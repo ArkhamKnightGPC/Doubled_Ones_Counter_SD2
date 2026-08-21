@@ -21,14 +21,14 @@ end entity contador4;
 architecture comportamental of contador4 is
     signal IQ: integer range 0 to 15;
 begin
-  
+
     process (clock,zera,conta,IQ)
-    begin 
+    begin
         if rising_edge(clock) then
             if zera='1' then  IQ <= 0;
-            elsif conta='1' then 
-                if IQ=15 then IQ <= 0; 
-                else          IQ <= IQ + 1; 
+            elsif conta='1' then
+                if IQ=15 then IQ <= 0;
+                else          IQ <= IQ + 1;
                 end if;
             else              IQ <= IQ;
             end if;

@@ -3,6 +3,7 @@
 SRC="../src"
 TB="../tb"
 
+ghdl -a --std=08 "${SRC}/reg.vhd"
 ghdl -a --std=08 "${SRC}/contador4.vhd"
 ghdl -a --std=08 "${SRC}/deslocador_n.vhd"
 ghdl -a --std=08 "${SRC}/onescounter_uc.vhd"

@@ -9,10 +9,10 @@ entity onescounter_uc is
     clock    : in  bit;
     reset    : in  bit;
     start    : in  bit;
-    data0    : in  bit;
+    conta_fd : in  bit;
     zero     : in  bit;
     zera     : out bit;
-    conta    : out bit;
+    conta_uc : out bit;
     carrega  : out bit;
     desloca  : out bit;
     registra : out bit;
@@ -21,7 +21,7 @@ entity onescounter_uc is
 end entity;
 
 architecture fsm of onescounter_uc is
-  type estado_t is (S0, S1, S2, S3, S4, S5);
+  type estado_t is (S0, S1, S2, S3, S4);
   signal PE, EA : estado_t;
   signal estado : integer := 0;
 begin
@@ -32,7 +32,6 @@ begin
     2 when S2,
     3 when S3,
     4 when S4,
-    5 when S5,
     9 when others;
 
   sincrono: process(clock, reset, PE)
@@ -44,13 +43,8 @@ begin
     end if;
   end process sincrono;
 
-  combinatorio: process(EA, start, data0, zero)
+  combinatorio: process(EA, start, zero)
   begin
-    -- zera     <= '0';
-    -- conta    <= '0';
-    -- carrega  <= '0';
-    -- desloca  <= '0';
-    -- registra <= '0';
 
     case(EA) is
       when S0 =>
@@ -60,8 +54,8 @@ begin
           PE <= S0;
         end if;
         done     <= '0';
-        zera     <= '0';
-        conta    <= '0';
+        zera     <= '1';
+        conta_uc <= '0';
         carrega  <= '0';
         desloca  <= '0';
         registra <= '0';
@@ -69,61 +63,49 @@ begin
       when S1 =>
         PE <= S2;
         done     <= '0';
-        zera     <= '1';
-        conta    <= '0';
+        zera     <= '0';
+        conta_uc <= '0';
         carrega  <= '1';
         desloca  <= '0';
         registra <= '0';
 
       when S2 =>
-        if data0='1' then
-          PE <= S3;
-        else
-          PE <= S4;
-        end if;
+        PE <= S3;
         done     <= '0';
         zera     <= '0';
-        conta    <= '0';
+        conta_uc <= conta_fd;
         carrega  <= '0';
         desloca  <= '0';
         registra <= '0';
 
       when S3 =>
-        PE <= S4;
-        done     <= '0';
-        zera     <= '0';
-        conta    <= '1';
-        carrega  <= '0';
-        desloca  <= '0';
-        registra <= '0';
-
-      when S4 =>
         if zero='1' then
-          PE <= S5;
+          PE <= S4;
         else
           PE <= S2;
         end if;
         done     <= '0';
         zera     <= '0';
-        conta    <= '0';
+        conta_uc <= '0';
         carrega  <= '0';
         desloca  <= '1';
         registra <= '0';
 
-      when S5 =>
+      when S4 =>
         PE <= S0;
         done     <= '1';
         zera     <= '0';
-        conta    <= '0';
+        conta_uc <= '0';
         carrega  <= '0';
         desloca  <= '0';
         registra <= '1';
 
       when others =>
+        -- atribuicao default (idealmente nunca se usa, mas eh importante para evitar latches na sintese!!)
         PE <= S0;
         done     <= '0';
         zera     <= '0';
-        conta    <= '0';
+        conta_uc <= '0';
         carrega  <= '0';
         desloca  <= '0';
         registra <= '0';

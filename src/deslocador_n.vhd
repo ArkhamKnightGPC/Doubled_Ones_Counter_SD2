@@ -14,9 +14,9 @@ entity deslocador_n is
     port (
         clock          : in  bit;
         reset          : in  bit;
-        carrega        : in  bit; 
-        desloca        : in  bit; 
-        entrada_serial : in  bit; 
+        carrega        : in  bit;
+        desloca        : in  bit;
+        entrada_serial : in  bit;
         dados          : in  bit_vector (N-1 downto 0);
         saida          : out bit_vector (N-1 downto 0)
     );
@@ -36,7 +36,7 @@ begin
             end if;
         end if;
     end process;
-  
-    saida <= IQ; 
+
+    saida <= IQ;
 
 end architecture deslocador_n_arch;

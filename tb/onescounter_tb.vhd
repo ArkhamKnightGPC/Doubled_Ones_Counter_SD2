@@ -12,14 +12,21 @@ entity onescounter_tb is
 end entity;
 
 architecture arch of onescounter_tb is
-  function conta(i:integer; s:integer) return integer is
-    variable c: integer:=0;
+
+  function conta(modo:bit; i:integer; s:integer) return integer is
+    variable c: integer := 0;
     variable bv: bit_vector(s-1 downto 0);
   begin
-    bv:=bit_vector(to_unsigned(i,s));
+    bv := bit_vector(to_unsigned(i, s));
     for ii in 0 to s-1 loop
-      if bv(ii)='1' then
-        c:=c+1;
+      if modo = '0' then
+        if bv(ii)='1' then
+          c := c+1;
+        end if;
+      elsif ii < s-1 then
+        if bv(ii)='1' and bv(ii+1)='1' then
+          c := c+1;
+        end if;
       end if;
     end loop;
     return c;
@@ -30,6 +37,7 @@ architecture arch of onescounter_tb is
     clock   : in  bit;
     reset   : in  bit;
     start   : in  bit;
+    modo    : in  bit;
     inport  : in  bit_vector(14 downto 0);
     outport : out bit_vector(3 downto 0);
     done    : out bit
@@ -39,7 +47,7 @@ architecture arch of onescounter_tb is
   constant size: integer := 15;
   constant ckp : time := 10 ns;
 
-  signal clk, rst, sim: bit := '0';
+  signal clk, rst, sim, modo: bit := '0';
   signal stt, don: bit;
   signal inp : bit_vector(14 downto 0);
   signal otp : bit_vector(3 downto 0);
@@ -52,6 +60,7 @@ begin
         clock   => clk,
         reset   => rst,
         start   => stt,
+        modo    => modo,
         inport  => inp,
         outport => otp,
         done    => don
@@ -70,36 +79,46 @@ begin
     wait until falling_edge(clk);
 
     for i in 0 to (2**size)-1 loop
-      -- report "Teste: "&integer'image(i);
+      --report "Teste: " & integer'image(i) & " com modo=0";
 
       wait until falling_edge(clk);
       inp <= bit_vector(to_unsigned(i,size));
-      stt <= '1'; -- pulso de start
+      modo <= '0';
+
+
+      stt <= '1';
       wait until falling_edge(clk);
       stt <= '0';
 
-      -- assert don='0'
-        -- report "Teste: "&integer'image(i)&". Done antes do estado final! Impossivel continuar."
-        -- severity failure;
-      -- while don='0' loop
-        -- wait until falling_edge(clk);
-      -- end loop;
-
-      -- wait until falling_edge(clk); --final da contagem
       wait until don='1'; --final da contagem
-      assert conta(i,size)=to_integer(unsigned(otp))
-        report "Teste: "&integer'image(i)&" falhou! Resposta:"&integer'image(to_integer(unsigned(otp)))
-        severity failure; -- para simulacao em caso de erro
-        -- severity error;
+      assert conta('0', i, size) = to_integer(unsigned(otp))
+        report "Teste: "&integer'image(i)&" com modo=0 falhou! Resposta:"&integer'image(to_integer(unsigned(otp))) severity failure;
 
-      -- assert conta(i,size)/=to_integer(unsigned(otp))
-        -- report "Teste: "&integer'image(i)&" passou."
-        -- severity note;
-
+      --report "Teste: "&integer'image(i)&" com modo=0 ok!" severity note;
       wait until falling_edge(clk);
     end loop;
 
-   assert false report "testes ok" severity note;
+    for i in 0 to (2**size)-1 loop
+      --report "Teste: " & integer'image(i) & " com modo=1";
+
+      wait until falling_edge(clk);
+      inp <= bit_vector(to_unsigned(i,size));
+      modo <= '0';
+
+
+      stt <= '1';
+      wait until falling_edge(clk);
+      stt <= '0';
+
+      wait until don='1'; --final da contagem
+      assert conta('0', i, size) = to_integer(unsigned(otp))
+        report "Teste: "&integer'image(i)&" como modo=1 falhou! Resposta:"&integer'image(to_integer(unsigned(otp))) severity failure;
+
+      --report "Teste: "&integer'image(i)&" com modo=1 ok!" severity note;
+      wait until falling_edge(clk);
+    end loop;
+
+   assert false report "Todos os testes ok!" severity note;
    assert false report "EOT" severity note;
    sim <='0';
    wait;
